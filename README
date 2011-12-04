@@ -1,0 +1,3 @@
+This folder contains my general purpose plotting utilities.
+I import these to specific macros to make things easier. For example the ratio plots modual does all the ratio plot stuff I need to.
+It is gradually being expanded as time goes on...

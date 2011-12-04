@@ -1,0 +1,11 @@
+##Python script to take input list of png's or use all png's
+##in the current working directory
+import glob
+
+pngs =  glob.glob("*.pngs")
+
+
+
+def wrapHeaders(text):
+  """Function that takes one argument, and wraps it with
+  headers and footers so that it 
