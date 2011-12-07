@@ -154,7 +154,7 @@ def makeRatio(hist1,hist2,ymax=False,ymin=False,norm=False):
 		print "Did you use a stack as argument 1? please use stack as argument 2!"
 		raise AttributeError
 	if ymax or ymin:
-		retH.GetYaxis().SetRangeUser(0.5,1.5)
+		retH.GetYaxis().SetRangeUser(ymin,ymax)
 	ROOT.SetOwnership(retH,0)
 	return retH
 	
