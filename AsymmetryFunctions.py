@@ -208,20 +208,29 @@ def GetArraysFromHists(hist1,hist2=None):
     return [arrayW[0],arrayW[1],arrayUW[2],arrayUW[3]]
         
 def GetArraysFromHistsTest(hist1,hist2=None):
-    profW = hist1.ProfileX(str(random()))
-    arrayW = GetArraysFromProfiles(profW)
-    if not hist2:
-        return arrayW
     #if we do have hist2 we use it to calculate the errors:
-    profUW = hist2.ProfileX(str(random()))
-    yerr = array("d",[])
+    x = array("d",[])
+    y = array("d",[])
+    xer = array("d",[])
+    yer = array("d",[])
     for b in range(hist1.GetNbinsX()):
         hTMP = hist1.ProjectionY(str(random()),b+1,b+1)
+        if hist2:
+            hUW = hist2.ProjectionY(str(random()),b+1,b+1)
+        else:
+            hUW = hTMP
         rms = hTMP.GetRMS()
-        Nent = profUW.GetBinEntries(b+1)
+        Nent = hUW.GetBinEntries(b+1)
         AsymEr = rms/ROOT.TMath.Sqrt(Nent)
-        AsymAv = profW.GetBinContent(b+1)
+        AsymAv = hTMP.GetMean()
+        R = (2+AsymAv)/(2-AsymAv)
         gerror = ROOT.TMath.Sqrt((AsymEr/2-AsymAv)*(AsymEr/2-AsymAv) + (AsymEr/2+AsymAv)*(AsymEr/2+AsymAv) )
+        etaRange = hTMP.GetXaxis().GetBinLowEdge(b+1) - hTMP.GetXaxis().GetBinUpEdge(b+1)
+        etaMidPoint = hTMP.GetXaxis().GetBinCenter(currentBin)
+        
+        x.append(etaMidPoint)
+        xer.append(etaRange)
+        y.append(R)
         yerr.append(gerror)
     #print profUW
     #arrayUW = GetArraysFromProfiles(profUW)
@@ -230,7 +239,7 @@ def GetArraysFromHistsTest(hist1,hist2=None):
         print "len yerr, ",len(yerr)
         print "len arrayW[1] ",len(arrayW[1])
         assert False
-    return [arrayW[0],arrayW[1],arrayW[2],yerr]
+    return [x,y,xer,yer]
         
 
 def BiggestHisto(hlist,rootFile):
