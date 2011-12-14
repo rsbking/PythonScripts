@@ -38,3 +38,4 @@ class SetPalette:
         npoints = len(s)
         TColor.CreateGradientColorTable(npoints, s, r, g, b, ncontours)
         gStyle.SetNumberContours(ncontours)
+

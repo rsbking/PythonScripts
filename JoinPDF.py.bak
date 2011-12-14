@@ -26,3 +26,4 @@ if __name__=="__main__":
         inList = glob.glob("*.pdf")
 
     join(inList,outname)
+

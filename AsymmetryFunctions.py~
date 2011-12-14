@@ -230,7 +230,7 @@ def GetArraysFromHistsTest(hist1,hist2=None):
         print "len yerr, ",len(yerr)
         print "len arrayW[1] ",len(arrayW[1])
         assert False
-    return [arrayW[0],arrayW[1],arrayW[2],yerr]
+    return [arrayW[0],arrayW[1],arrayUW[2],yerr]
         
 
 def BiggestHisto(hlist,rootFile):

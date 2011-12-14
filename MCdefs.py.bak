@@ -1,29 +1,29 @@
 #define class for MC samples I use with useful info:
 import ROOT,MCmetaReader
 class MCsample:
-
-    def __init__(self,RunNumb,name,filename,color,XS=0,kFactor=1,efficency=1):
-        """intializer. The arguments are
-        RunNumber: to get the correct meta data from the meta data reader,
-        name: a readable name which is the filename without the '.root'
-        color: a color variable for root. Within this file there is a dictionary defining these colors"""
-        self.RunNumber = RunNumb
-        self.name = name #something nice and human
-        self.filename = filename #the longer name
-        try:
-            self.efficency = MCmetaReader.getFilterEff(RunNumb)
-            self.kFactor = MCmetaReader.getMCkfactor(RunNumb)
-            self.XS = MCmetaReader.getMCXS(RunNumb)
-            self.XSeff = self.XS * self.kFactor * self.efficency
-        except(AssertionError):
-            self.efficency = MCmetaReader.getFilterEff(RunNumb)
-            self.kFactor = MCmetaReader.getMCkfactor(RunNumb)
-            self.XS = MCmetaReader.getMCXS(RunNumb)
-            self.XSeff = self.XS * self.kFactor * self.efficency
-        self.color = color
-        self.Nentries = 0 #this is intialized to Zero. Can be filled at use if desired
-        self.weight = 0
-
+	
+	def __init__(self,RunNumb,name,filename,color,XS=0,kFactor=1,efficency=1):
+		"""intializer. The arguments are 
+		RunNumber: to get the correct meta data from the meta data reader,
+		name: a readable name which is the filename without the '.root'
+		color: a color variable for root. Within this file there is a dictionary defining these colors"""
+		self.RunNumber = RunNumb
+		self.name = name #something nice and human
+		self.filename = filename #the longer name
+		try:
+			self.efficency = MCmetaReader.getFilterEff(RunNumb)
+			self.kFactor = MCmetaReader.getMCkfactor(RunNumb)
+			self.XS = MCmetaReader.getMCXS(RunNumb)
+			self.XSeff = self.XS * self.kFactor * self.efficency
+		except(AssertionError):
+			self.efficency = MCmetaReader.getFilterEff(RunNumb)
+			self.kFactor = MCmetaReader.getMCkfactor(RunNumb)
+			self.XS = MCmetaReader.getMCXS(RunNumb)
+			self.XSeff = self.XS * self.kFactor * self.efficency
+		self.color = color
+		self.Nentries = 0 #this is intialized to Zero. Can be filled at use if desired
+		self.weight = 0
+		
 ##now define objects for all the MC files I need:
 
 #dictionary for the colors for various samples

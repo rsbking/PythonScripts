@@ -5,7 +5,7 @@ def makeTexRow(inList):
     outList = []
     for (i,item) in enumerate(inList):
         outList.append(str(item) + ' & ')
-
+    
     outList[-1] += ' \\\\ \n' #create end of row syntax
     #NB \\\\ because first slash is python string esc.!
 
@@ -14,7 +14,7 @@ def makeTexRow(inList):
 
 def finalizeTable(rowList,title="default title"):
     """This function takes a list of tex table rows and completes them with header and footer returning a string so that it can just be pasted into a tex file"""
-
+    
     ncolumns = len(rowList[0])
     columnStr = "c "
     ot = "%This is a automatically generated table from python \n"
