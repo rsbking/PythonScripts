@@ -2,6 +2,8 @@
 import ROOT
 from array import array
 from random import random
+from math import sqrt
+
 def SetStyle(batchSwitch=1):
     import atlasStyle
     ROOT.gROOT.ForceStyle()
@@ -139,6 +141,14 @@ def ReturnArraysHistDoubleBins(hist,graphN,EtaBins):
 
     return [widex,widey,widexer,wideyer]
 
+def GeterrorDef1(AsymEr,AsymAv):
+    """Old definition of errors. This is probably wrong"""
+    return sqrt((AsymEr/(2-AsymAv))*(AsymEr/(2-AsymAv)) + (AsymEr/(2+AsymAv))*(AsymEr/(2+AsymAv)) )
+    
+def GeterrorDef2(AsymEr,AsymAv):
+    """New definition of errors, this is correct I think"""
+    return (4*AsymEr/((2 - AsymAv)**2))
+
 def ReturnArray2dProf(hist,EtaBins,xBin):
     """Return a list of arrays of x,y,erx,ery"""
     x = array("d",[])
@@ -156,7 +166,7 @@ def ReturnArray2dProf(hist,EtaBins,xBin):
         AsymAv = hist.GetBinContent(globalBin)
         AsymEr = hist.GetBinError(globalBin )
         R = (2+AsymAv)/(2-AsymAv) #=1/c
-        Rer = ROOT.TMath.Sqrt((AsymEr/2-AsymAv)*(AsymEr/2-AsymAv) + (AsymEr/2+AsymAv)*(AsymEr/2+AsymAv) )
+        Rer = GeterrorDef2(AsymEr,AsymAv)
         etaRange = float(EtaBins[bin+1]) - float(EtaBins[bin])
         etaMidPoint = float(EtaBins[bin]) + etaRange/2
         x.append(etaMidPoint)
@@ -181,7 +191,7 @@ def GetArraysFromProfiles(prof):
         AsymAv = prof.GetBinContent(currentBin)
         AsymEr = prof.GetBinError(currentBin)
         R = (2+AsymAv)/(2-AsymAv) #=1/c
-        Rer = ROOT.TMath.Sqrt((AsymEr/2-AsymAv)*(AsymEr/2-AsymAv) + (AsymEr/2+AsymAv)*(AsymEr/2+AsymAv) )
+        Rer = GeterrorDef2(AsymEr,AsymAv)
 
         etaRange = prof.GetBinLowEdge(currentBin+1) - prof.GetBinLowEdge(currentBin)
         etaMidPoint = prof.GetBinCenter(currentBin)
@@ -208,30 +218,35 @@ def GetArraysFromHists(hist1,hist2=None):
     return [arrayW[0],arrayW[1],arrayUW[2],arrayUW[3]]
         
 def GetArraysFromHistsTest(hist1,hist2=None):
-    profW = hist1.ProfileX(str(random()))
-    arrayW = GetArraysFromProfiles(profW)
-    if not hist2:
-        return arrayW
+    
     #if we do have hist2 we use it to calculate the errors:
-    profUW = hist2.ProfileX(str(random()))
-    yerr = array("d",[])
+    x = array("d",[])
+    y = array("d",[])
+    xer = array("d",[])
+    yer = array("d",[])
     for b in range(hist1.GetNbinsX()):
-        hTMP = hist1.ProjectionY(str(random()),b+1,b+1)
+        hTMP = hist1.ProjectionY("weightedHist"+str(random()),b+1,b+1,'e')
+        if hist2:
+            hUW = hist2.ProjectionY("UWHist"+str(random()),b+1,b+1,'e')
+        else:
+            hUW = hTMP
         rms = hTMP.GetRMS()
-        Nent = profUW.GetBinEntries(b+1)
-        AsymEr = rms/ROOT.TMath.Sqrt(Nent)
-        AsymAv = profW.GetBinContent(b+1)
-        gerror = ROOT.TMath.Sqrt((AsymEr/2-AsymAv)*(AsymEr/2-AsymAv) + (AsymEr/2+AsymAv)*(AsymEr/2+AsymAv) )
-        yerr.append(gerror)
-    #print profUW
-    #arrayUW = GetArraysFromProfiles(profUW)
-    if len(yerr) != len(arrayW[1]):
-        print "Error - yerrs not same number as bins"
-        print "len yerr, ",len(yerr)
-        print "len arrayW[1] ",len(arrayW[1])
-        assert False
-    return [arrayW[0],arrayW[1],arrayUW[2],yerr]
-        
+        Nent = hUW.GetEffectiveEntries()
+        try:
+            AsymEr = rms/ROOT.TMath.Sqrt(Nent)
+        except(IndexError):
+            continue
+        AsymAv = hTMP.GetMean()
+        R = (2+AsymAv)/(2-AsymAv)
+        t1 = AsymEr/(2-AsymAv)
+        gerror = GeterrorDef2(AsymEr,AsymAv)
+        etaRange = hist1.GetXaxis().GetBinUpEdge(b+1) - hist1.GetXaxis().GetBinLowEdge(b+1) 
+        etaMidPoint = hist1.GetXaxis().GetBinCenter(b+1)
+        x.append(etaMidPoint)
+        xer.append(etaRange/2)
+        y.append(R)
+        yer.append(gerror)
+    return [x,y,xer,yer]
 
 def BiggestHisto(hlist,rootFile):
 
