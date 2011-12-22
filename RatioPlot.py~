@@ -77,8 +77,8 @@ def multiRatio(hist1,hist2,log=False,xTitle="",yTitle="",drawPlot1Opt="",drawPlo
 
     maxList = []
     if not norm:
-        h2[0].Draw(drawPlot2Opt)
-        maxList.append(h2[0].GetMaximum())
+        hist2[0].Draw(drawPlot2Opt)
+        maxList.append(hist2[0].GetMaximum())
         for h in hist2[1:]:
             h.Draw("same"+drawPlot2Opt)
             maxList.append(h.GetMaximum())
@@ -93,7 +93,7 @@ def multiRatio(hist1,hist2,log=False,xTitle="",yTitle="",drawPlot1Opt="",drawPlo
         hist1 = hist1.DrawNormalized("same"+drawPlot1Opt)
         maxList.append(hist1.GetMaximum())
     ymax = max(*maxList)
-    h2.GetYaxis().SetRangeUser(0,ymax*1.2)
+    hist2[0].GetYaxis().SetRangeUser(0,ymax*1.2)
     c.cd()
     c.cd(2)
     ratios = []
@@ -105,6 +105,8 @@ def multiRatio(hist1,hist2,log=False,xTitle="",yTitle="",drawPlot1Opt="",drawPlo
 
 
     ratioHist.SetLineColor(hist2[0].GetLineColor())
+    ratioHist.SetMarkerColor(hist2[0].GetLineColor())
+    ratioHist.SetMarkerStyle(hist2[0].GetMarkerStyle())
     ratioHist.Draw(drawPlot1Opt)
 
     for h in hist2[1:]:
@@ -114,6 +116,8 @@ def multiRatio(hist1,hist2,log=False,xTitle="",yTitle="",drawPlot1Opt="",drawPlo
         ratioHist.GetYaxis().SetTitle(yTitle)
 
         ratioHist.SetLineColor(h.GetLineColor())
+        ratioHist.SetMarkerStyle(h.GetMarkerStyle())
+        ratioHIst.SetMarkerColor(h.GetMarkerStyle())
         ratioHist.Draw(drawPlot1Opt+"SAME")
 
     line = ROOT.TLine(ratioHist.GetXaxis().GetXmin(),1,ratioHist.GetXaxis().GetXmax(),1)
