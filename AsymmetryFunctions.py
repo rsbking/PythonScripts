@@ -79,6 +79,8 @@ def ReturnArraysHist(hist,graphN,EtaBins):
     #cPickle.dump(returnList,outputFile)
 
     return returnList
+    
+
 
 def ReturnArraysHistAddBins(hist,graphN,EtaBins,nAdd = 2):
     hist.Rebin(nAdd)
@@ -176,47 +178,59 @@ def ReturnArray2dProf(hist,EtaBins,xBin):
 
     return [x,y,xer,yer]
 
-def GetArraysFromProfiles(prof):
-    """reutrn a list of arrays of x,y,erx,ery"""
-    x = array("d",[])
-    y = array("d",[])
-    xer = array("d",[])
-    yer = array("d",[])
-    nEtaBins = prof.GetNbinsX()
-    for yBin in range(nEtaBins):
-        currentBin = yBin+1
-        if currentBin>nEtaBins: print "actung, bin number ",currentBin
-        entries = prof.GetBinEntries(currentBin)
-        if entries == 0  : continue #don't fill for this binning
-        AsymAv = prof.GetBinContent(currentBin)
-        AsymEr = prof.GetBinError(currentBin)
-        R = (2+AsymAv)/(2-AsymAv) #=1/c
-        Rer = GeterrorDef2(AsymEr,AsymAv)
+#def GetArraysFromProfiles(prof):
+    #"""reutrn a list of arrays of x,y,erx,ery"""
+    #x = array("d",[])
+    #y = array("d",[])
+    #xer = array("d",[])
+    #yer = array("d",[])
+    #nEtaBins = prof.GetNbinsX()
+    #for yBin in range(nEtaBins):
+        #currentBin = yBin+1
+        #if currentBin>nEtaBins: print "actung, bin number ",currentBin
+        #entries = prof.GetBinEntries(currentBin)
+        #if entries == 0  : continue #don't fill for this binning
+        #AsymAv = prof.GetBinContent(currentBin)
+        #AsymEr = prof.GetBinError(currentBin)
+        #R = (2+AsymAv)/(2-AsymAv) #=1/c
+        #Rer = GeterrorDef2(AsymEr,AsymAv)
 
-        etaRange = prof.GetBinLowEdge(currentBin+1) - prof.GetBinLowEdge(currentBin)
-        etaMidPoint = prof.GetBinCenter(currentBin)
-        x.append(etaMidPoint)
-        y.append(R)
-        xer.append(etaRange/2)
-        yer.append(Rer)
-    return [x,y,xer,yer]
+        #etaRange = prof.GetBinLowEdge(currentBin+1) - prof.GetBinLowEdge(currentBin)
+        #etaMidPoint = prof.GetBinCenter(currentBin)
+        #x.append(etaMidPoint)
+        #y.append(R)
+        #xer.append(etaRange/2)
+        #yer.append(Rer)
+    #return [x,y,xer,yer]
 
-def GetArraysFromHists(hist1,hist2=None):
-    """This takes two histograms and returns an array to make TGraphErrors
-    the first is the weighted version, the second is the unweighted (optional)
-    if the second is provided it will be used to calculate the errors"""
-    #
+#def GetArraysFromHists(hist1,hist2=None):
+    #"""This takes two histograms and returns an array to make TGraphErrors
+    #the first is the weighted version, the second is the unweighted (optional)
+    #if the second is provided it will be used to calculate the errors"""
+    ##
     
-    profW = hist1.ProfileX(str(random()))
-    arrayW = GetArraysFromProfiles(profW)
-    if not hist2:
-        return arrayW
-    #if we do have hist2 we use it to calculate the errors:
-    profUW = hist2.ProfileX(str(random()))
-    print profUW
-    arrayUW = GetArraysFromProfiles(profUW)
-    return [arrayW[0],arrayW[1],arrayUW[2],arrayUW[3]]
-        
+    #profW = hist1.ProfileX(str(random()))
+    #arrayW = GetArraysFromProfiles(profW)
+    #if not hist2:
+        #return arrayW
+    ##if we do have hist2 we use it to calculate the errors:
+    #profUW = hist2.ProfileX(str(random()))
+    #print profUW
+    #arrayUW = GetArraysFromProfiles(profUW)
+    #return [arrayW[0],arrayW[1],arrayUW[2],arrayUW[3]]
+       
+def GetResponseFromBin(hist):
+    rms = hist.GetRMS()
+    Nent = hist.GetEffectiveEntries()
+    try:
+        AsymEr = rms/ROOT.TMath.Sqrt(Nent)
+    except(ZeroDivisionError):
+        return
+    AsymAv = hist.GetMean()
+    R = (2+AsymAv)/(2-AsymAv)
+    gerror = GeterrorDef2(AsymEr,AsymAv)
+    return (R,gerror)
+
 def GetArraysFromHistsTest(hist1,hist2=None):
     
     #if we do have hist2 we use it to calculate the errors:
@@ -230,16 +244,12 @@ def GetArraysFromHistsTest(hist1,hist2=None):
             hUW = hist2.ProjectionY("UWHist"+str(random()),b+1,b+1,'e')
         else:
             hUW = hTMP
-        rms = hTMP.GetRMS()
-        Nent = hUW.GetEffectiveEntries()
+        Response = GetResponseFromBin(hUW)
         try:
-            AsymEr = rms/ROOT.TMath.Sqrt(Nent)
-        except(ZeroDivisionError):
-            continue
-        AsymAv = hTMP.GetMean()
-        R = (2+AsymAv)/(2-AsymAv)
-        t1 = AsymEr/(2-AsymAv)
-        gerror = GeterrorDef2(AsymEr,AsymAv)
+            R = Response[0]
+            gerror = Response[1]
+        except(TypeError):
+            return None #this is when we get a none from the point.
         etaRange = hist1.GetXaxis().GetBinUpEdge(b+1) - hist1.GetXaxis().GetBinLowEdge(b+1) 
         etaMidPoint = hist1.GetXaxis().GetBinCenter(b+1)
         x.append(etaMidPoint)
