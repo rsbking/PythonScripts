@@ -5,17 +5,23 @@ import ROOT
 from array import array
 
 def ratioPlot(hist1,hist2,log=False,xTitle="",yTitle="",drawPlot1Opt="",drawPlot2Opt="",norm=False,ratioMin=0.5,ratioMax=1.5):
+    print "yeah I'm in ratioPlot"
     if isinstance(hist2,list):
         if isinstance(hist1,ROOT.TGraph):
             c = multiGraphRatio(hist1,hist2,log,xTitle,yTitle,drawPlot1Opt,drawPlot2Opt,norm,ratioMin=ratioMin,ratioMax=ratioMax)
+            print "point 1"
         else:
             c = multiRatio(hist1,hist2,log,xTitle,yTitle,drawPlot1Opt,drawPlot2Opt,norm,ratioMin=ratioMin,ratioMax=ratioMax)
+            print "point 2"
     else:
         if isinstance(hist1,ROOT.TGraph):
             c = GraphRatio(hist1,hist2,log,xTitle,yTitle,drawPlot1Opt,drawPlot2Opt,norm,ratioMin=ratioMin,ratioMax=ratioMax)
+            print "hello, just checking this is where we are"
+            print c
         else:
             c = tworatios(hist1,hist2,log,xTitle,yTitle,drawPlot1Opt,drawPlot2Opt,norm,ratioMin=ratioMin,ratioMax=ratioMax)
-    return c
+            print "point 3"
+        return c
 
 
 def tworatios(hist1,hist2,log=False,xTitle="",yTitle="",drawPlot1Opt="",drawPlot2Opt="",norm=False,ratioMin=0.5,ratioMax=1.5):
@@ -216,6 +222,7 @@ def MakeRatioGraphs(array1,array2,xMin,xMax,yMin,yMax):
 
 def GraphRatio(array1,array2):
     """takes two arrays that are made to make graphs and return one array which is for the ratio of the two"""
+    
     x = array("d",[])
     y = array("d",[])
     xer = array("d",[])
@@ -228,7 +235,7 @@ def GraphRatio(array1,array2):
                 i2=j
                 break
         x.append(x1)
-
+        
         yR = array1[1][i]/array2[1][i2]
         y.append(yR)
         xRer = array1[2][i]
